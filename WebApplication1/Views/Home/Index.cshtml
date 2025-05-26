@@ -1,0 +1,134 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+@model WebApplication1.Models.DashboardViewModel // DashboardViewModel をモデルとして受け取る
+
+@{
+    ViewData["Title"] = "会社情報ダッシュボード"; // ページのタイトル
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>各テーブルのデータ一覧です。</p>
+
+<hr />
+
+<h2>部署一覧</h2>
+@* 部署データを表示するためのHTMLテーブル *@
+<table class="table">
+    @* Bootstrapのテーブルクラスを使用 (テンプレートにBootstrapが含まれている場合) *@
+    <thead>
+        <tr>
+            <th>部署ID</th>
+            <th>部署名</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* モデルのDepartmentsリストがnullでなく、要素があるか確認 *@
+        @if (Model != null && Model.Departments != null && Model.Departments.Any())
+        {
+            @* Departmentsリストの各要素に対してループ *@
+            @foreach (var item in Model.Departments)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.DepartmentID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DepartmentName)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            @* データがない場合の表示 *@
+            <tr>
+                <td colspan="2">部署データが見つかりませんでした。</td> @* 2列にまたがるセル *@
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h2>従業員一覧</h2>
+@* 従業員データを表示するためのHTMLテーブル *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>従業員ID</th>
+            <th>部署ID</th>
+            <th>従業員名</th>
+            <th>入社日</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* モデルのEmployeesリストがnullでなく、要素があるか確認 *@
+        @if (Model != null && Model.Employees != null && Model.Employees.Any())
+        {
+            @* Employeesリストの各要素に対してループ *@
+            @foreach (var item in Model.Employees)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.EmployeeID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DepartmentID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.EmployeeName)</td>
+                    <td>
+                        @* Null許容DateTimeの表示。値があれば表示、なければ空欄 *@
+                        @(item.HireDate.HasValue ? Html.DisplayFor(modelItem => item.HireDate) : (object)"")
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            @* データがない場合の表示 *@
+            <tr>
+                <td colspan="4">従業員データが見つかりませんでした。</td> @* 4列にまたがるセル *@
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h2>給与一覧</h2>
+@* 給与データを表示するためのHTMLテーブル *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>給与ID</th>
+            <th>従業員ID</th>
+            <th>給与額</th>
+            <th>適用日</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* モデルのSalariesリストがnullでなく、要素があるか確認 *@
+        @if (Model != null && Model.Salaries != null && Model.Salaries.Any())
+        {
+            @* Salariesリストの各要素に対してループ *@
+            @foreach (var item in Model.Salaries)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.SalaryID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.EmployeeID)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.EffectiveDate)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            @* データがない場合の表示 *@
+            <tr>
+                <td colspan="4">給与データが見つかりませんでした。</td> @* 4列にまたがるセル *@
+            </tr>
+        }
+    </tbody>
+</table>
+
+@* 必要に応じて他のHTML要素を追加 *@
