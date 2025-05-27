@@ -5,12 +5,12 @@ using WebApplication1.Models; // モデルクラスのために必要
 
 namespace WebApplication1.DataAccess // プロジェクト名やフォルダ構成に合わせて変更してください
 {
-    public class EmployeeRepository
+    public class EmployeeBC
     {
         private readonly string _connectionString;
 
         // コンストラクタで接続文字列を受け取る
-        public EmployeeRepository(string connectionString)
+        public EmployeeBC(string connectionString)
         {
             _connectionString = connectionString;
         }
@@ -77,7 +77,7 @@ namespace WebApplication1.DataAccess // プロジェクト名やフォルダ構�
         public List<Salary> GetAllSalaries()
         {
             List<Salary> salaries = new List<Salary>();
-            string sql = "SELECT SalaryID, EmployeeID, Amount, EffectiveDate FROM Salaries ORDER BY SalaryID";
+            string sql = "SELECT EmployeeID, Amount, EffectiveDate FROM Salaries ORDER BY EmployeeID";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -90,8 +90,6 @@ namespace WebApplication1.DataAccess // プロジェクト名やフォルダ構�
                         {
                             salaries.Add(new Salary
                             {
-                                SalaryID = reader.GetInt32(reader.GetOrdinal("SalaryID")), // int型で取得
-                                // EmployeeIDはNullの可能性を考慮
                                 EmployeeID = reader.IsDBNull(reader.GetOrdinal("EmployeeID")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("EmployeeID")),
                                 Amount = reader.GetDecimal(reader.GetOrdinal("Amount")), // decimal型で取得
                                 EffectiveDate = reader.GetDateTime(reader.GetOrdinal("EffectiveDate")) // DateTime型で取得

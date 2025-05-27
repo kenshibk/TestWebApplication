@@ -1,0 +1,162 @@
+﻿@model IEnumerable<WebApplication1.Models.EmployeeViewModel>
+
+@{
+    ViewData["Title"] = "社員一覧";
+}
+
+<h2>社員一覧</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>部門名</th>
+            <th>社員名</th>
+            <th>入社日</th>
+            <th>給与</th>
+            <th>給与適用日</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.DepartmentName</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.HireDate</td>
+                <td>@item.Salary</td>
+                <td>@item.EffectiveDate</td>
+                <td>
+                    <button class="btn btn-primary btn-sm edit-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                            data-employee-id="@item.EmployeeID">
+                        編集
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- 編集モーダル -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editForm" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">社員編集</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="EmployeeID" id="modalEmployeeID" />
+                    <div class="mb-3">
+                        <label for="modalDepartmentID" class="form-label">部門名</label>
+                        <select class="form-control" name="DepartmentID" id="modalDepartmentID" required>
+                            <option value="">選択してください</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalEmployeeName" class="form-label">社員名</label>
+                        <input type="text" class="form-control" name="EmployeeName" id="modalEmployeeName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalHireDate" class="form-label">入社日</label>
+                        <input type="date" class="form-control" name="HireDate" id="modalHireDate" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalSalary" class="form-label">給与</label>
+                        <input type="number" class="form-control" name="Salary" id="modalSalary" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalEffectiveDate" class="form-label">給与適用日</label>
+                        <input type="date" class="form-control" name="EffectiveDate" id="modalEffectiveDate" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 部署リストを取得してドロップダウンにセット
+        function loadDepartments(selectedId) {
+            fetch('@Url.Action("GetDepartments", "Employee")')
+                .then(response => response.json())
+                .then(departments => {
+                    var select = document.getElementById('modalDepartmentID');
+                    select.innerHTML = '<option value="">選択してください</option>';
+                    departments.forEach(function (d) {
+                        var opt = document.createElement('option');
+                        opt.value = d.departmentID;
+                        opt.text = d.departmentName;
+                        if (selectedId && d.departmentID === selectedId) {
+                            opt.selected = true;
+                        }
+                        select.appendChild(opt);
+                    });
+                });
+        }
+
+        // 編集ボタン押下時にDBからデータ取得してモーダルへセット
+        document.querySelectorAll('.edit-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = btn.getAttribute('data-employee-id');
+                fetch('@Url.Action("GetEmployee", "Employee")?id=' + id)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Not found');
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById('modalEmployeeID').value = data.employeeID ?? "";
+                        document.getElementById('modalEmployeeName').value = data.employeeName ?? "";
+                        document.getElementById('modalHireDate').value = data.hireDate ?? "";
+                        document.getElementById('modalSalary').value = data.salary ?? "";
+                        document.getElementById('modalEffectiveDate').value = data.effectiveDate ?? "";
+                        loadDepartments(data.departmentID);
+                    })
+                    .catch(() => {
+                        alert('データ取得に失敗しました');
+                    });
+            });
+        });
+
+        // モーダル内にエラーメッセージ表示用
+        function showModalError(message) {
+            let err = document.getElementById('modalError');
+            if (!err) {
+                err = document.createElement('div');
+                err.id = 'modalError';
+                err.className = 'alert alert-danger';
+                document.querySelector('#editForm .modal-body').prepend(err);
+            }
+            err.textContent = message;
+        }
+
+        // フォーム送信時にPOST
+        document.getElementById('editForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var form = e.target;
+            var data = new FormData(form);
+
+            fetch('@Url.Action("Edit", "Employee")', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    return response.json().then(err => {
+                        showModalError(err.message || "更新に失敗しました");
+                    });
+                }
+            });
+        });
+        
+    </script>
+}

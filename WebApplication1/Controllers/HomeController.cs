@@ -59,7 +59,7 @@ namespace WebApplication1.Controllers // ƒvƒƒWƒFƒNƒg–¼‚É‡‚í‚¹‚Ä•ÏX‚µ‚Ä‚­‚¾‚³‚
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             // EmployeeRepository ‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğì¬
-            EmployeeRepository repository = new EmployeeRepository(connectionString);
+            EmployeeBC repository = new EmployeeBC(connectionString);
 
             // Šeƒe[ƒuƒ‹‚©‚çƒf[ƒ^‚ğæ“¾
             List<Department> departments = repository.GetAllDepartments();
